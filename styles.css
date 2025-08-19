@@ -10,7 +10,13 @@
     flex-direction: column;
     min-height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color-scheme: light dark;
     background-color: var(--background-color);
+    background-image:
+      radial-gradient(1200px 800px at var(--pointer-x, 50%) var(--pointer-y, 30%), var(--scene-glow-1) 0%, transparent 60%),
+      radial-gradient(800px 600px at calc(var(--pointer-x, 50%) + 20%) calc(var(--pointer-y, 30%) + 20%), var(--scene-glow-2) 0%, transparent 55%),
+      linear-gradient(180deg, var(--scene-bg-1), var(--scene-bg-2));
+    background-attachment: fixed;
     color: var(--text-color);
     transition: background-color 0.4s ease, color 0.4s ease;
     font-weight: lighter;
@@ -24,20 +30,40 @@
   /* Variables for light and dark mode */
   :root {
     --background-color: #eaeaea; /* Light mode background */
-    --text-color: #000; /* Light mode text color */
-    --footer-background: #f1f1f1; /* Light mode footer background */
-    --footer-text-color: #666; /* Light mode footer text color */
-    --link-color: #0073e6; /* Light mode link color */
-    --window-background: #f1f1f1; /* Light mode content window background */
+    --text-color: #0b0b0b; /* Light mode text color */
+    --footer-background: rgba(255, 255, 255, 0.6); /* Light footer material */
+    --footer-text-color: #3a3a3a; /* Light mode footer text color */
+    --link-color: #0a84ff; /* macOS/iOS Accent Blue */
+    --window-background: rgba(255, 255, 255, 0.55); /* Light material */
+    --window-stroke: color-mix(in oklab, #000 12%, transparent); /* Hairline border */
+    --window-highlight: color-mix(in oklab, #fff 35%, transparent);
+    --drop-shadow: 0 10px 30px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.35) inset;
+    --backdrop-blur: saturate(140%) blur(24px);
+    --corner-radius: 16px;
+    --accent: #0a84ff;
+    --scene-bg-1: #eaeaea;
+    --scene-bg-2: #dcdcdc;
+    --scene-glow-1: rgba(118, 188, 255, 0.25);
+    --scene-glow-2: rgba(255, 118, 188, 0.20);
   }
   
   .dark-mode {
-    --background-color: #1e1e1e; /* Dark mode background */
-    --text-color: #bbb; /* Dark mode text color */
-    --footer-background: #333; /* Dark mode footer background */
-    --footer-text-color: #bbb; /* Dark mode footer text color */
-    --link-color: #66b3ff; /* Dark mode link color */
-    --window-background: #333; /* Dark mode content window background */
+    --background-color: #1c1c1e; /* Dark mode background */
+    --text-color: #e5e5e7; /* Dark mode text color */
+    --footer-background: rgba(30, 30, 32, 0.55);
+    --footer-text-color: #c8c8cc;
+    --link-color: #66b3ff;
+    --window-background: rgba(30, 30, 32, 0.55); /* Dark material */
+    --window-stroke: color-mix(in oklab, #fff 10%, transparent);
+    --window-highlight: color-mix(in oklab, #fff 7%, transparent);
+    --drop-shadow: 0 16px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset;
+    --backdrop-blur: saturate(160%) blur(26px);
+    --corner-radius: 18px;
+    --accent: #0a84ff;
+    --scene-bg-1: #1c1c1e;
+    --scene-bg-2: #161617;
+    --scene-glow-1: rgba(30, 80, 255, 0.18);
+    --scene-glow-2: rgba(255, 60, 120, 0.12);
   }
   
   /* Fixed macOS-like Top Bar */
@@ -47,8 +73,11 @@
     left: 0;
     right: 0;
     z-index: 1000; /* Ensure it is above other elements */
-    background-color: var(--window-background);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(180deg, color-mix(in oklab, var(--window-background) 70%, transparent), color-mix(in oklab, var(--window-background) 90%, transparent));
+    -webkit-backdrop-filter: var(--backdrop-blur);
+    backdrop-filter: var(--backdrop-blur);
+    border-bottom: 1px solid var(--window-stroke);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
   }
   
   .menu-bar {
@@ -71,10 +100,26 @@
     width: 80%;
     max-width: 1000px;
     min-height: 400px; /* Set a minimum height for both windows */
-    background-color: var(--window-background);
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.4s ease;
+    position: relative;
+    background:
+      linear-gradient(180deg, color-mix(in oklab, var(--window-background) 100%, transparent), color-mix(in oklab, var(--window-background) 85%, transparent));
+    border-radius: var(--corner-radius);
+    border: 1px solid var(--window-stroke);
+    -webkit-backdrop-filter: var(--backdrop-blur);
+    backdrop-filter: var(--backdrop-blur);
+    box-shadow: var(--drop-shadow);
+    transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, transform 0.25s ease;
+    overflow: clip;
+  }
+
+  .window::before, .footer-window::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(180deg, var(--window-highlight), transparent 40%);
+    mix-blend-mode: soft-light;
   }
   
   /* Common Styles for Window Content */
@@ -90,11 +135,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: var(--window-header-background);
+    background: linear-gradient(180deg, color-mix(in oklab, #fff 10%, transparent), color-mix(in oklab, #000 6%, transparent));
     padding: 0.5rem 1rem;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+    border-top-left-radius: var(--corner-radius);
+    border-top-right-radius: var(--corner-radius);
     transition: background-color 0.4s ease;
+    border-bottom: 1px solid var(--window-stroke);
   }
   
   .window-buttons, .footer-window .window-buttons {
@@ -124,7 +170,8 @@
   /* Footer Window Positioning */
   .footer-window {
     margin-top: 8rem;
-    background-color: var(--footer-background);
+    background:
+      linear-gradient(180deg, color-mix(in oklab, var(--footer-background) 100%, transparent), color-mix(in oklab, var(--footer-background) 85%, transparent));
     padding-bottom: 1.5rem;
     text-align: center;
     position: relative;
@@ -168,15 +215,55 @@
   
   /* Footer Dark Mode Toggle Button */
   .theme-toggle {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
+    appearance: none;
+    background: linear-gradient(180deg, color-mix(in oklab, var(--window-background) 100%, transparent), color-mix(in oklab, var(--window-background) 80%, transparent));
+    border: 1px solid var(--window-stroke);
+    border-radius: 999px;
+    font-size: 1.1rem;
     cursor: pointer;
     color: var(--text-color);
-    transition: color 0.4s ease, transform 0.2s ease;
+    transition: color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease, background 0.25s ease;
+    padding: 0.4rem 0.6rem;
+    -webkit-backdrop-filter: var(--backdrop-blur);
+    backdrop-filter: var(--backdrop-blur);
+    accent-color: var(--accent);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 6px 20px rgba(0,0,0,0.15);
   }
   
   .theme-toggle:hover {
-    transform: scale(1.2);
+    transform: translateY(-1px);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 10px 26px rgba(0,0,0,0.22);
+  }
+
+  .theme-toggle:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--accent) 80%, transparent);
+    outline-offset: 2px;
+  }
+
+  a {
+    accent-color: var(--accent);
+  }
+
+  .menu-item a:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .menu-bar {
+    gap: 0.5rem;
+  }
+
+  /* Elevation on hover for primary windows (subtle) */
+  .window:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.16), 0 1px 0 rgba(255,255,255,0.35) inset;
+  }
+
+  /* Accessibility: respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition: none !important;
+      animation: none !important;
+    }
   }
   
